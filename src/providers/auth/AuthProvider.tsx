@@ -24,7 +24,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const signUp: AuthContext["signUp"] = useCallback(
     async (userData) => {
       try {
-        await httpClient.post(`${endpoints.SIGN_IN}`, userData);
+        await httpClient.post(`${endpoints.SIGN_UP}`, userData);
         setIsSignedIn(true);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
