@@ -4,11 +4,19 @@ import axios from "axios";
 
 export function HttpClientProvider({ children }: PropsWithChildren) {
   const axiosInstance = useMemo(() => {
-    return axios.create({
+    const instance = axios.create({
       baseURL: import.meta.env.VITE_BACKEND_BASE_URL,
       timeout: parseInt(import.meta.env.VITE_REQUEST_TIMEOUT),
       withCredentials: true,
     });
+    instance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error?.response?.data) throw error.response.data;
+        throw error;
+      }
+    );
+    return instance;
   }, []);
 
   const get = useCallback(
