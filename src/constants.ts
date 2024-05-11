@@ -3,6 +3,7 @@ export enum endpoints {
   SIGN_UP = "authentication/sign-up",
   VERIFY_TOKEN = "authentication/verify-token",
   SIGN_OUT = "authentication/sign-out",
+  REFRESH_TOKEN = "authentication/refresh-token",
 }
 
 export enum pages {

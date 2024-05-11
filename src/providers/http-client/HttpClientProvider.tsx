@@ -1,6 +1,11 @@
 import { PropsWithChildren, useCallback, useMemo } from "react";
-import { HttpClientContext, httpClientContext } from "./httpClientContext";
+import {
+  HttpClientContext,
+  httpClientContext,
+  authExpiredSubject,
+} from "./httpClientContext";
 import axios from "axios";
+import { endpoints } from "../../constants";
 
 export function HttpClientProvider({ children }: PropsWithChildren) {
   const axiosInstance = useMemo(() => {
@@ -9,6 +14,22 @@ export function HttpClientProvider({ children }: PropsWithChildren) {
       timeout: parseInt(import.meta.env.VITE_REQUEST_TIMEOUT),
       withCredentials: true,
     });
+    instance.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
+        if (error?.response?.status === 403 && !originalRequest._retry) {
+          originalRequest._retry = true;
+          try {
+            await instance.post(endpoints.REFRESH_TOKEN);
+            return await instance(originalRequest);
+          } catch (_e) {
+            authExpiredSubject.next();
+            throw error;
+          }
+        } else throw error;
+      }
+    );
     instance.interceptors.response.use(
       (response) => response,
       (error) => {

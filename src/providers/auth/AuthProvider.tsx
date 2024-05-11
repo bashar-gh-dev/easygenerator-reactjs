@@ -1,7 +1,14 @@
-import { PropsWithChildren, useCallback, useMemo, useState } from "react";
+import {
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { AuthContext, authContext } from "./authContext";
 import { useHttpClient } from "../http-client/useHttpClient";
 import { endpoints } from "../../constants";
+import { authExpired$ } from "../http-client/httpClientContext";
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -55,6 +62,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
     () => ({ isSignedIn, signIn, signUp, signOut, refreshAuthStatus }),
     [isSignedIn, signIn, signOut, signUp, refreshAuthStatus]
   );
+
+  useEffect(() => {
+    const subscription = authExpired$.subscribe(() => {
+      setIsSignedIn(false);
+    });
+    return () => {
+      subscription.unSubscribe();
+    };
+  }, [signOut]);
 
   return (
     <authContext.Provider value={authContextValue}>
