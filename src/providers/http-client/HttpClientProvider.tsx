@@ -4,7 +4,7 @@ import {
   httpClientContext,
   authExpiredSubject,
 } from "./httpClientContext";
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { endpoints } from "../../constants";
 
 export function HttpClientProvider({ children }: PropsWithChildren) {
@@ -18,7 +18,10 @@ export function HttpClientProvider({ children }: PropsWithChildren) {
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
-        if (error?.response?.status === 403 && !originalRequest._retry) {
+        if (
+          error?.response?.status === HttpStatusCode.Forbidden &&
+          !originalRequest._retry
+        ) {
           originalRequest._retry = true;
           try {
             await instance.post(endpoints.REFRESH_TOKEN);
@@ -27,7 +30,9 @@ export function HttpClientProvider({ children }: PropsWithChildren) {
             authExpiredSubject.next();
             throw error;
           }
-        } else throw error;
+        } else {
+          throw error;
+        }
       }
     );
     instance.interceptors.response.use(

@@ -70,7 +70,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return () => {
       subscription.unSubscribe();
     };
-  }, [signOut]);
+  }, []);
 
   return (
     <authContext.Provider value={authContextValue}>
